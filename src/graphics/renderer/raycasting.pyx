@@ -2,6 +2,7 @@ import numpy as np
 cimport numpy as np
 
 from camera.transform import pixel_to_world_coord
+from copy import copy
 
 
 cdef np.ndarray depth_rendering(np.float32_t[:, :] extrinsics,

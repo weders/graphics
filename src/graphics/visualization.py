@@ -1,5 +1,6 @@
 from mayavi import mlab
 import numpy as np
+import os
 
 def plot_voxelgrid(grid):
 
@@ -32,7 +33,7 @@ def plot_tsdf(tsdf):
 
     mlab.show()
 
-def plot_mesh(mesh):
+def plot_mesh(mesh, save=False, path=None):
 
     vertices = mesh['vertex']
 
@@ -44,6 +45,12 @@ def plot_mesh(mesh):
     if 'face' in mesh:
         tri_idx = mesh['face']['vertex_indices']
         triangles = np.asarray(tri_idx)
+
         mlab.triangular_mesh(x, y, z, triangles)
 
+    if save:
+        assert path is not None
+        mlab.savefig(os.path.join(path, 'VoxelGT.obj'))
+
     mlab.show()
+

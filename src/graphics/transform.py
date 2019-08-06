@@ -1,19 +1,22 @@
 import numpy as np
 import dt
 
-from copy import copy
-
 
 def compute_tsdf(grid):
 
-    grid = copy(grid)
+    new_grid = np.copy(grid).astype(np.float64)
 
-    grid[np.where(grid == 0.)] = 10000000000. #very bugy, need to discuss that
-    grid[np.where(grid == 1.)] = 0.
+    new_grid[np.where(new_grid == 0.)] = 2.
+    new_grid[np.where(new_grid == 1.)] = 0.
+    new_grid[np.where(new_grid == 2.)] = 1.
 
-    tsdf, i = dt.compute(grid)
+    new_grid = 10.e6*new_grid
 
-    return tsdf, i
+    tsdf, i = dt.compute(new_grid)
+
+    tsdf = np.sqrt(tsdf)
+
+    return tsdf
 
 
 

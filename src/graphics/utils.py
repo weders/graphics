@@ -1,18 +1,19 @@
 import plyfile
 import numpy as np
 from skimage.measure import marching_cubes_lewiner
+import mcubes
 
 
-def extract_mesh_marching_cubes(volume, color=None, level=0.5,
-                                step_size=1.0, gradient_direction="ascent"):
+def extract_mesh_marching_cubes(volume, color=None, level=0.,
+                                step_size=1., gradient_direction="ascent"):
+
+    print(np.unique(volume))
 
     if level > volume.max() or level < volume.min():
         return
 
-    verts, faces, normals, values = marching_cubes_lewiner(volume,
-                                                           level=level,
-                                                           step_size=step_size,
-                                                           gradient_direction=gradient_direction)
+    verts, faces = mcubes.marching_cubes(volume, level)
+
 
     ply_verts = np.empty(len(verts),
                          dtype=[("x", "f4"), ("y", "f4"), ("z", "f4")])
