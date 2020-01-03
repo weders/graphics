@@ -10,6 +10,45 @@ from gridData import OpenDX
 from tqdm import tqdm
 
 
+class FeatureGrid(object):
+
+    def __init__(self, resolution, bbox, n_features=10, origin=None):
+
+        self._resolution = resolution
+        self._bbox = bbox
+        self._n_features = n_features
+        self._origin = origin
+
+        xshape = np.diff(bbox[0, :])
+        yshape = np.diff(bbox[1, :])
+        zshape = np.diff(bbox[2, :])
+
+        self._shape = (xshape, yshape, zshape, n_features)
+
+        self._data = np.zeros(self._shape)
+
+    @property
+    def resolution(self):
+        return self._resolution
+
+    @property
+    def bbox(self):
+        return self._bbox
+
+    @property
+    def origin(self):
+        return self._origin
+
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def shape(self):
+        return self._shape
+
+
+
 class Voxelgrid(object):
 
     def __init__(self, resolution, bbox=None, origin=None, initial_value=0.):
