@@ -7,8 +7,6 @@ import mcubes
 def extract_mesh_marching_cubes(volume, color=None, level=-1e-07,
                                 step_size=1., gradient_direction="ascent"):
 
-    print(np.unique(volume))
-
     if level > volume.max() or level < volume.min():
         return
 
