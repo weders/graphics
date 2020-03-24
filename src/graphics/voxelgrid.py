@@ -19,9 +19,9 @@ class FeatureGrid(object):
         self._n_features = n_features
         self._origin = origin
 
-        xshape = np.diff(bbox[0, :])
-        yshape = np.diff(bbox[1, :])
-        zshape = np.diff(bbox[2, :])
+        xshape = int(np.floor(np.diff(bbox[0, :]) / resolution))
+        yshape = int(np.floor(np.diff(bbox[1, :]) / resolution))
+        zshape = int(np.floor(np.diff(bbox[2, :]) / resolution))
 
         self._shape = (xshape, yshape, zshape, n_features)
 
@@ -43,6 +43,10 @@ class FeatureGrid(object):
     def data(self):
         return self._data
 
+    @data.setter
+    def data(self, data):
+        self._data = data
+
     @property
     def shape(self):
         return self._shape
@@ -53,7 +57,7 @@ class Voxelgrid(object):
 
     def __init__(self, resolution, bbox=None, origin=None, initial_value=0.):
 
-        self.resolution = resolution
+        self._resolution = resolution
 
         self._volume = None
         self._bbox = None
@@ -63,7 +67,7 @@ class Voxelgrid(object):
 
             self._bbox = bbox
 
-            volume_shape = np.diff(self._bbox, axis=1).ravel() / self.resolution
+            volume_shape = np.diff(self._bbox, axis=1).ravel() / self._resolution
             volume_shape = np.ceil(volume_shape).astype(np.int32).tolist()  # round up
 
             self._volume = initial_value*np.ones(volume_shape)
@@ -87,26 +91,26 @@ class Voxelgrid(object):
         diffy = maxy - miny
         diffz = maxz - minz
 
-        minx -= self.resolution * diffx
-        maxx += self.resolution * diffx
-        miny -= self.resolution * diffy
-        maxy += self.resolution * diffy
-        minz -= self.resolution * diffz
-        maxz += self.resolution * diffz
+        minx -= self._resolution * diffx
+        maxx += self._resolution * diffx
+        miny -= self._resolution * diffy
+        maxy += self._resolution * diffy
+        minz -= self._resolution * diffz
+        maxz += self._resolution * diffz
 
         self._bbox = np.array(((minx, maxx), (miny, maxy), (minz, maxz)),
                               dtype=np.float32)
 
-        volume_shape = np.diff(self._bbox, axis=1).ravel()/self.resolution
+        volume_shape = np.diff(self._bbox, axis=1).ravel()/self._resolution
         volume_shape = np.ceil(volume_shape).astype(np.int32).tolist() # round up
 
         self._volume = np.zeros(volume_shape)
         self._origin = np.asarray([minx, miny, minz])
 
         for row, point in tqdm(pointcloud.points.iterrows(), total=len(pointcloud.points)):
-            x = int((point['x'] - minx) / self.resolution)
-            y = int((point['y'] - miny) / self.resolution)
-            z = int((point['z'] - minz) / self.resolution)
+            x = int((point['x'] - minx) / self._resolution)
+            y = int((point['y'] - miny) / self._resolution)
+            z = int((point['z'] - minz) / self._resolution)
 
             self._volume[x, y, z] = 1.
 
@@ -131,16 +135,16 @@ class Voxelgrid(object):
         diffy = maxy - miny
         diffz = maxz - minz
 
-        minx -= self.resolution * diffx
-        maxx += self.resolution * diffx
-        miny -= self.resolution * diffy
-        maxy += self.resolution * diffy
-        minz -= self.resolution * diffz
-        maxz += self.resolution * diffz
+        minx -= self._resolution * diffx
+        maxx += self._resolution * diffx
+        miny -= self._resolution * diffy
+        maxy += self._resolution * diffy
+        minz -= self._resolution * diffz
+        maxz += self._resolution * diffz
 
-        nx = int(np.ceil((maxx - minx) / self.resolution)[0])
-        ny = int(np.ceil((maxy - miny) / self.resolution)[0])
-        nz = int(np.ceil((maxz - minz) / self.resolution)[0])
+        nx = int(np.ceil((maxx - minx) / self._resolution)[0])
+        ny = int(np.ceil((maxy - miny) / self._resolution)[0])
+        nz = int(np.ceil((maxz - minz) / self._resolution)[0])
 
         self._bbox = np.array(((minx, maxx), (miny, maxy), (minz, maxz)),
                               dtype=np.float32)
@@ -148,9 +152,9 @@ class Voxelgrid(object):
 
         for point in pcl:
 
-            x = int((point[0] - minx) / self.resolution)
-            y = int((point[1] - miny) / self.resolution)
-            z = int((point[2] - minz) / self.resolution)
+            x = int((point[0] - minx) / self._resolution)
+            y = int((point[1] - miny) / self._resolution)
+            z = int((point[2] - minz) / self._resolution)
 
             self._volume[x, y, z] = 1.
 
@@ -169,7 +173,7 @@ class Voxelgrid(object):
         origin = dx.components['positions'].origin
         delta = dx.components['positions'].delta[0, 0]
         shape = dx.components['positions'].shape
-        data = dx.components['data'].array
+        data = dx.components['dataset'].array
 
         data = data.reshape(shape)
 
@@ -187,7 +191,7 @@ class Voxelgrid(object):
         diffy = maxy - miny
         diffz = maxz - minz
 
-        self.resolution = delta
+        self._resolution = delta
         self._bbox = np.array(((minx, maxx), (miny, maxy), (minz, maxz)),
                               dtype=np.float32)
 
@@ -216,6 +220,10 @@ class Voxelgrid(object):
     def shape(self):
         assert self._volume is not None
         return self._volume.shape
+
+    @property
+    def resolution(self):
+        return self._resolution
 
     def transform(self, mode='normal'):
         if mode == 'normal':
@@ -253,12 +261,22 @@ class Voxelgrid(object):
         volume = np.expand_dims(self._volume, axis=-1).astype(np.float32)
 
 
-        resolution = self.resolution
+        resolution = self._resolution
 
         depth = depth_rendering(extrinsics, intrinsics, shape,
                                 volume, resolution, offset, frame)
 
         return depth
+
+    def downsample(self, shape):
+
+        old_shape = 1. / self._resolution
+        sampling = int(old_shape / shape)
+
+        # downsampling
+        self._volume = self._volume[::sampling, ::sampling, ::sampling]
+        self._resolution = 1. / shape
+
 
     def compare(self, reference):
 
