@@ -19,6 +19,8 @@ class FeatureGrid(object):
         self._n_features = n_features
         self._origin = origin
 
+        print(bbox)
+
         xshape = int(np.floor(np.diff(bbox[0, :]) / resolution))
         yshape = int(np.floor(np.diff(bbox[1, :]) / resolution))
         zshape = int(np.floor(np.diff(bbox[2, :]) / resolution))
@@ -60,17 +62,22 @@ class Voxelgrid(object):
         self._resolution = resolution
 
         self._volume = None
-        self._bbox = None
-        self._origin = None
+        self._bbox = bbox
+        self._origin = origin
 
         if (bbox is not None) and (origin is not None):
 
+            print(bbox)
+
             self._bbox = bbox
 
-            volume_shape = np.diff(self._bbox, axis=1).ravel() / self._resolution
-            volume_shape = np.ceil(volume_shape).astype(np.int32).tolist()  # round up
+            xshape = int(np.floor(np.diff(bbox[0, :]) / resolution))
+            yshape = int(np.floor(np.diff(bbox[1, :]) / resolution))
+            zshape = int(np.floor(np.diff(bbox[2, :]) / resolution))
 
-            self._volume = initial_value*np.ones(volume_shape)
+            self._shape = (xshape, yshape, zshape)
+
+            self._volume = initial_value*np.ones(self._shape)
             self._origin = origin
 
     def from_pointcloud(self, pointcloud):
