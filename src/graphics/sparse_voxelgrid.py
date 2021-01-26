@@ -1,3 +1,6 @@
+# Code based on Sandro Lombardi's Sparse TSDF grid implementation
+# modified by Livio Steiner
+
 import os.path as osp
 import itertools
 import math
