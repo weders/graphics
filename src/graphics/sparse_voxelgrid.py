@@ -34,6 +34,49 @@ class RegularSparseVoxelGrid(object):
         self.unique_values = torch.empty([0, self.n_features], dtype=torch.float, device=store_device)
         self.unique_weights = torch.empty([0], dtype=torch.float, device=store_device)
 
+        # only intermediate
+        bbox = np.array([[-0.5,  0.5],
+                        [-0.5,  0.5],
+                        [-0.5, 0.5]])
+
+        # what is called resolution here, is actually the cell size
+        self._resolution = cell_size
+        self._bbox = bbox
+        self._n_features = n_features
+        self._origin = grid_origin
+
+        xshape = int(np.floor(np.diff(bbox[0, :]) / cell_size))
+        yshape = int(np.floor(np.diff(bbox[1, :]) / cell_size))
+        zshape = int(np.floor(np.diff(bbox[2, :]) / cell_size))
+
+        self._shape = (xshape, yshape, zshape, n_features)
+        # TODO: data must obviously be modified.
+        self._data = np.zeros(self._shape)
+
+    @property
+    def resolution(self):
+        return self._resolution
+
+    @property
+    def bbox(self):
+        return self._bbox
+
+    @property
+    def origin(self):
+        return self._origin
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, data):
+        self._data = data
+
+    @property
+    def shape(self):
+        return self._shape
+
     def update(self, grid_points, values):
         assert grid_points.shape[0] == values.shape[0]
         assert values.shape[1] == self.n_features  # assertions might slow down the thing drastically.
