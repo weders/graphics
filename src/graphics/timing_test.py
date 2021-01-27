@@ -73,3 +73,10 @@ if __name__ == '__main__':
         query_position = query_voxel_indices_torch[idx]
         feature_vector = sparse_grid.get_feature_vector_from_index(query_position)
     print("--- %s seconds ---" % (time.time() - start_time))
+
+    # sparse grid v2
+    start_time = time.time()
+    for idx in range(n_queries):
+        query_position = query_voxel_indices_torch[idx]
+        feature_vector = sparse_grid.get_feature_vector_from_index2(query_position)
+    print("--- %s seconds ---" % (time.time() - start_time))
