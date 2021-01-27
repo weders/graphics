@@ -34,21 +34,22 @@ if __name__ == '__main__':
                                          cell_size=cell_size,
                                          n_features=n_features,
                                          compute_device='cuda',
-                                         store_device='cpu')
+                                         store_device='cuda')
 
     # iterate over the 3d grid and take an index with probability = density_factor
     voxel_indices_list = get_random_voxel_indices(density_factor, resolution)
     voxel_indices_np = np.array(voxel_indices_list)
-    voxel_indices_torch = torch.tensor(voxel_indices_np)
+    voxel_indices_torch = torch.tensor(voxel_indices_np, device='cuda')
     n_samples = len(voxel_indices_list)
 
     random_features_np = np.random.rand(n_samples, n_features)
-    random_features_torch = torch.tensor(random_features_np)
+    random_features_torch = torch.tensor(random_features_np, device='cuda')
 
     print('populating dense grid ...')
     for idx in range(voxel_indices_np.shape[0]):
         voxel_index = voxel_indices_np[idx]
         dense_grid._data[voxel_index] = random_features_np[idx]
+    # dense_grid._data[voxel_indices_np] = random_features_np
 
     print('populating sparse grid ...')
     sparse_grid.update(voxel_indices_torch, random_features_torch)
@@ -58,7 +59,7 @@ if __name__ == '__main__':
     n_queries = 10000
     query_indices = np.random.randint(n_samples, size=n_queries)
     query_voxel_indices_np = voxel_indices_np[query_indices]
-    query_voxel_indices_torch = torch.tensor(query_voxel_indices_np)
+    query_voxel_indices_torch = torch.tensor(query_voxel_indices_np, device='cuda')
 
     # dense grid
     start_time = time.time()
