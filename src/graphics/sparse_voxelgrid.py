@@ -53,7 +53,7 @@ class RegularSparseVoxelGrid(object):
 
         self._shape = (xshape, yshape, zshape, n_features)
         # TODO: data must obviously be modified.
-        self._data = np.zeros(self._shape)
+        # self._data = np.zeros(self._shape)
 
     @property
     def resolution(self):
@@ -71,9 +71,11 @@ class RegularSparseVoxelGrid(object):
     def data(self):
         return self._data
 
+    '''
     @data.setter
     def data(self, data):
         self._data = data
+    '''
 
     @property
     def shape(self):
