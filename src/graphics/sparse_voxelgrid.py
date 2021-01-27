@@ -139,9 +139,13 @@ class RegularSparseVoxelGrid(object):
             self.unique_values = self.unique_values.pin_memory()
         del unique_values, unique_weights
 
-    # TODO: this is very nasty, needs to be modified.
+    '''
     def get_feature_vector_from_index(self, grid_index):
-        # assumption: is in list, modify
         tensor_indices = (self.unique_grid_points == grid_index).nonzero()
         tensor_index = tensor_indices[0][0]
+        return self.unique_values[tensor_index]
+    '''
+
+    def get_feature_vector_from_index(self, grid_index):
+        tensor_index = torch.where((self.unique_grid_points == grid_index).all(dim=1))[0]
         return self.unique_values[tensor_index]
