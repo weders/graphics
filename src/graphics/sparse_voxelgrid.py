@@ -81,6 +81,9 @@ class RegularSparseVoxelGrid(object):
     def shape(self):
         return self._shape
 
+    def get_device(self):
+        return 'cuda'
+
     def update(self, grid_points, values):
         assert grid_points.shape[0] == values.shape[0]
         assert values.shape[1] == self.n_features  # assertions might slow down the thing drastically.
