@@ -39,8 +39,6 @@ class RegularSparseVoxelGrid(object):
                         [-0.5,  0.5],
                         [-0.5, 0.5]])
 
-        print(bbox)
-
         # what is called resolution here, is actually the cell size
         self._resolution = cell_size
         self._bbox = bbox
